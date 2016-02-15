@@ -1,24 +1,25 @@
 {
     "appKeys": {
-        "COLOR_BACKGROUND": 5,
-        "COLOR_HOUR_HAND": 9,
-        "COLOR_HOUR_MARKS": 7,
-        "COLOR_LABEL": 6,
-        "COLOR_MINUTE_HAND": 10,
-        "COLOR_MINUTE_MARKS": 8,
-        "COLOR_SECOND_HAND": 11,
-        "SHOW_DATE": 3,
-        "SHOW_NUMBERS": 1,
-        "SHOW_SECOND_HAND": 2,
-        "SHOW_TEMPERATURE": 4,
-        "TEMPERATURE": 0
+        "TEMPERATURE":          0,
+        "SHOW_NUMBERS":         1,
+        "SHOW_SECOND_HAND":     2,
+        "SHOW_DATE":            3,
+        "SHOW_TEMPERATURE":     4,
+        "SHOW_STEPS":           5,
+        "COLOR_BACKGROUND":     6,
+        "COLOR_LABEL":          7,
+        "COLOR_HOUR_MARKS":     8,
+        "COLOR_MINUTE_MARKS":   9,
+        "COLOR_HOUR_HAND":      10,
+        "COLOR_MINUTE_HAND":    11,
+        "COLOR_SECOND_HAND":    12
     },
     "capabilities": [
         "location",
         "configurable"
     ],
     "companyName": "Nicko Guyer",
-    "longName": "Engineering",
+    "longName": "Engineering Steps",
     "projectType": "native",
     "resources": {
         "media": []
@@ -31,7 +32,7 @@
         "chalk"
     ],
     "uuid": "ff541ca4-a444-4513-879a-35ff9ec48a1b",
-    "versionLabel": "1.6",
+    "versionLabel": "1.7",
     "watchapp": {
         "watchface": true
     }

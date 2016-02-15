@@ -4,16 +4,21 @@
 
 static Window *window;
 static Layer *s_simple_bg_layer, *s_date_layer, *s_hands_layer;
-static TextLayer *s_day_label, *s_num_label;
+static TextLayer *s_day_label, *s_num_label, *s_steps_label;
 
 static GPath *s_minute_arrow, *s_hour_arrow;
-static char s_date_buffer[7], s_temp_buffer[5];
+static char s_date_buffer[7], s_temp_buffer[5], s_steps_buffer[8];
+
 
 static AppSync s_sync;
 static uint8_t s_sync_buffer[64];
 
 static GColor gcolor_background, gcolor_hour_marks, gcolor_minute_marks, gcolor_numbers, gcolor_hour_hand, gcolor_minute_hand, gcolor_second_hand;
-static bool b_show_numbers, b_show_temperature, b_show_date, b_show_second_hand;
+static bool b_show_numbers, b_show_temperature, b_show_date, b_show_second_hand, b_show_steps;
+
+static void handle_tick(struct tm *tick_time, TimeUnits units_changed) {
+	layer_mark_dirty(window_get_root_layer(window));
+}
 
 static void load_persisted_values() {
 	// SHOW_NUMBERS
@@ -29,6 +34,16 @@ static void load_persisted_values() {
 	// SHOW_TEMPERATURE
 	if (persist_exists(KEY_SHOW_TEMPERATURE)) {
 	  b_show_temperature = persist_read_int(KEY_SHOW_TEMPERATURE);
+	}
+
+	// SHOW_TEMPERATURE
+	if (persist_exists(KEY_SHOW_TEMPERATURE)) {
+	  b_show_temperature = persist_read_int(KEY_SHOW_TEMPERATURE);
+	}
+
+	// SHOW_STEPS
+	if (persist_exists(KEY_SHOW_STEPS)) {
+	  b_show_steps = persist_read_int(KEY_SHOW_STEPS);
 	}
 
 	// SHOW_DATE
@@ -109,11 +124,25 @@ static void inbox_received_handler(DictionaryIterator *iter, void *context) {
 		persist_write_int(KEY_SHOW_TEMPERATURE, b_show_temperature);
  	}
 
+ 	Tuple *show_steps_t = dict_find(iter, KEY_SHOW_STEPS);
+	if(show_steps_t) {
+		APP_LOG(APP_LOG_LEVEL_INFO, "Show steps %d", show_steps_t->value->uint8);
+ 		b_show_steps = show_steps_t->value->uint8;
+		persist_write_int(KEY_SHOW_STEPS, show_steps_t->value->uint8);
+ 	}
+
 	Tuple *show_second_hand_t = dict_find(iter, KEY_SHOW_SECOND_HAND);
 	if(show_second_hand_t) {
 		APP_LOG(APP_LOG_LEVEL_INFO, "Show second hand %d", show_second_hand_t->value->uint8);
  		b_show_second_hand = show_second_hand_t->value->uint8;
 		persist_write_int(KEY_SHOW_SECOND_HAND, show_second_hand_t->value->uint8);
+
+		if (b_show_second_hand) {
+			tick_timer_service_subscribe(SECOND_UNIT, handle_tick);
+		} else {
+			tick_timer_service_subscribe(MINUTE_UNIT, handle_tick);
+		}
+
  	}
 
 	Tuple *color_background_t = dict_find(iter, KEY_COLOR_BACKGROUND);
@@ -252,6 +281,38 @@ static void bg_update_proc(Layer *layer, GContext *ctx) {
 	}
 }
 
+static void health_handler(HealthEventType event, void *context) {
+
+	if (b_show_steps) {
+		if (event == HealthEventMovementUpdate) {
+			// display the step count
+
+			//Lifted from https://github.com/freakified/TimeStylePebble by freakified
+			// format step string
+			 int steps = (int)health_service_sum_today(HealthMetricStepCount);
+		    if(steps < 1000) {
+		      snprintf(s_steps_buffer, sizeof(s_steps_buffer), "%i", steps);
+		    } else {
+		      int steps_thousands = steps / 1000;
+		      int steps_hundreds  = steps / 100 % 10;
+
+		      char decimalSeparator[1] = ".";
+
+		      if (steps < 10000) {
+		        snprintf(s_steps_buffer, sizeof(s_steps_buffer), "%i%s%iK", steps_thousands, decimalSeparator, steps_hundreds);
+		      } else {
+		        snprintf(s_steps_buffer, sizeof(s_steps_buffer), "%iK", steps_thousands);
+		      }
+		    }
+		
+			text_layer_set_text(s_steps_label, s_steps_buffer);
+
+		}
+	}
+
+  
+}
+
 static void hands_update_proc(Layer *layer, GContext *ctx) {
 	GRect bounds = layer_get_bounds(layer);
 	GPoint center = grect_center_point(&bounds);
@@ -281,6 +342,22 @@ static void hands_update_proc(Layer *layer, GContext *ctx) {
 #else
 		graphics_draw_text(ctx, s_date_buffer, fonts_get_system_font(FONT_KEY_GOTHIC_18), GRect(100, 78, 45 + offset, 14), GTextOverflowModeWordWrap, GTextAlignmentCenter, NULL);
 #endif
+	}
+
+	// steps
+	if (!b_show_steps) {
+
+		health_service_events_unsubscribe();
+		text_layer_set_text(s_steps_label, "");
+	} else {
+		text_layer_set_text_color(s_steps_label, gcolor_numbers);
+
+		// subscribe to health events
+	  	if(health_service_events_subscribe(health_handler, NULL)) {
+	    	health_handler(HealthEventMovementUpdate, NULL);
+	  	} else {
+	    	APP_LOG(APP_LOG_LEVEL_ERROR, "Health not available!");
+	  	}
 	}
 
 	// temperature
@@ -324,10 +401,6 @@ static void date_update_proc(Layer *layer, GContext *ctx) {
 	uppercase(s_date_buffer);
 }
 
-static void handle_second_tick(struct tm *tick_time, TimeUnits units_changed) {
-	layer_mark_dirty(window_get_root_layer(window));
-}
-
 static void window_load(Window *window) {
 	Layer *window_layer = window_get_root_layer(window);
 	GRect bounds = layer_get_bounds(window_layer);
@@ -347,6 +420,39 @@ static void window_load(Window *window) {
 	layer_add_child(window_layer, s_hands_layer);
 
 	load_persisted_values();
+
+	if (b_show_second_hand) {
+
+		tick_timer_service_subscribe(SECOND_UNIT, handle_tick);
+	} else {
+
+		tick_timer_service_subscribe(MINUTE_UNIT, handle_tick);
+	}
+
+	// subscribe to health events
+  	if(health_service_events_subscribe(health_handler, NULL)) {
+    	// force initial steps display
+
+		int offset = !b_show_numbers * 10;
+
+    	s_steps_label = text_layer_create(PBL_IF_ROUND_ELSE(
+    		GRect(0, 120 + offset, 180, 18),
+    		GRect(0, 100 + offset, 144, 14)
+    	));
+
+    	text_layer_set_background_color(s_steps_label, GColorClear);
+  		text_layer_set_text_color(s_steps_label, gcolor_numbers);
+  		text_layer_set_font(s_steps_label, fonts_get_system_font(PBL_IF_ROUND_ELSE(FONT_KEY_GOTHIC_18, FONT_KEY_GOTHIC_14)));
+  		text_layer_set_text_alignment(s_steps_label, GTextAlignmentCenter);
+  		layer_add_child(s_date_layer, text_layer_get_layer(s_steps_label));
+
+    	if (b_show_steps) {
+	    	health_handler(HealthEventMovementUpdate, NULL);
+    	}
+
+  	} else {
+    	APP_LOG(APP_LOG_LEVEL_ERROR, "Health not available!");
+  	}
 }
 
 static void window_unload(Window *window) {
@@ -355,6 +461,8 @@ static void window_unload(Window *window) {
 
 	text_layer_destroy(s_day_label);
 	text_layer_destroy(s_num_label);
+	text_layer_destroy(s_steps_label);
+
 
 	layer_destroy(s_hands_layer);
 }
@@ -383,6 +491,8 @@ static void init() {
 	b_show_second_hand = true;
 	b_show_date = true;
 	b_show_temperature = true;
+	b_show_steps = true;
+
 
 	window = window_create();
 	window_set_window_handlers(window, (WindowHandlers) {
@@ -404,7 +514,7 @@ static void init() {
 	gpath_move_to(s_minute_arrow, center);
 	gpath_move_to(s_hour_arrow, center);
 
-	tick_timer_service_subscribe(SECOND_UNIT, handle_second_tick);
+	 
 
 	app_message_register_inbox_received(inbox_received_handler);
 	app_message_open(64, 64);
@@ -415,6 +525,8 @@ static void deinit() {
 	gpath_destroy(s_hour_arrow);
 
 	tick_timer_service_unsubscribe();
+	health_service_events_unsubscribe();
+
 	window_destroy(window);
 }
 

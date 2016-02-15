@@ -39,7 +39,7 @@ Pebble.addEventListener('ready',function(e) {
 );
 
 Pebble.addEventListener('showConfiguration', function() {
-  var url = 'https://rawgit.com/nguyer/pebble-engineering/1.5/config/index.html';
+  var url = 'https://rawgit.com/kencaron/pebble-engineering/master/config/index.html';
   console.log('Showing configuration page: ' + url);
 
   Pebble.openURL(url);
@@ -62,6 +62,7 @@ Pebble.addEventListener('webviewclosed', function(e) {
 	toggleDict.SHOW_SECOND_HAND = configData.show_second_hand;
 	toggleDict.SHOW_DATE = configData.show_date;
 	toggleDict.SHOW_TEMPERATURE = configData.show_temperature;
+	toggleDict.SHOW_STEPS = configData.show_steps;
 
 	var colorDict = {};
 
