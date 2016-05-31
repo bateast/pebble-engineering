@@ -18,20 +18,18 @@
         "configurable"
     ],
     "companyName": "Nicko Guyer",
-    "longName": "Engineering",
+    "longName": "Engineering-shadow",
     "projectType": "native",
     "resources": {
         "media": []
     },
     "sdkVersion": "3",
-    "shortName": "Engineering",
+    "shortName": "Engineering-shadow",
     "targetPlatforms": [
-        "aplite",
-        "basalt",
-        "chalk"
+        "basalt"
     ],
-    "uuid": "ff541ca4-a444-4513-879a-35ff9ec48a1b",
-    "versionLabel": "1.6",
+    "uuid": "3f2fc7bd-fe40-465f-96fb-9ddf40c6e1f3",
+    "versionLabel": "1.7",
     "watchapp": {
         "watchface": true
     }
