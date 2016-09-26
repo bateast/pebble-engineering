@@ -30,7 +30,7 @@ typedef int8_t GShadow;
 #define GShadowMaxValue  10000
 GColor gcolor (GShadow shadow);
 
-GShadow new_shadowing_object (int inner_z, int outer_z);
+GShadow new_shadowing_object (int base_z, int inner_z, int outer_z);
 
 void switch_to_shadow_ctx (GContext *ctx);
 void revert_to_fb_ctx (GContext *ctx);

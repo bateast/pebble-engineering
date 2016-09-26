@@ -15,10 +15,10 @@
         "COLOR_SECOND_HAND":    12
     },
     "capabilities": [
-        "location",
+        "health",
         "configurable"
     ],
-    "companyName": "Nicko Guyer",
+    "companyName": "Baptiste Fouques",
     "longName": "Engineering-shadow",
     "projectType": "native",
     "resources": {
@@ -30,7 +30,7 @@
         "basalt"
     ],
     "uuid": "3f2fc7bd-fe40-465f-96fb-9ddf40c6e1f3",
-    "versionLabel": "1.7",
+    "versionLabel": "1.9",
     "watchapp": {
         "watchface": true
     }
