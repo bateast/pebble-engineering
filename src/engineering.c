@@ -21,7 +21,7 @@ static void handle_tick(struct tm *tick_time, TimeUnits units_changed) {
 	layer_mark_dirty(window_get_root_layer(window));
 }
 
-static GShadow shadow_hour_marks, shadow_minute_marks, shadow_numbers, shadow_hour_hand, shadow_minute_hand, shadow_second_hand, shadow_dot;
+static GShadow shadow_hour_marks, shadow_minute_marks, shadow_numbers, shadow_hour_hand, shadow_minute_hand, shadow_second_hand, shadow_dot, shadow_date_box, shadow_hole;
 
 static void load_persisted_values() {
 	if (persist_exists(KEY_SHOW_NUMBERS)) {
@@ -218,6 +218,12 @@ static void bg_update_proc(Layer *layer, GContext *ctx) {
   GRect inner_hour_frame = grect_inset(bounds, GEdgeInsets((4 * INSET) + 8));
   GRect inner_minute_frame = grect_inset(bounds, GEdgeInsets((4 * INSET) + 6));
 
+  /* // Center hole */
+  /* switch_to_shadow_ctx (ctx);{ */
+  /*   graphics_context_set_fill_color(ctx, gcolor (shadow_hole)); */
+  /*   graphics_fill_circle(ctx, (GPoint){.x = bounds.size.w / 2, .y = bounds.size.h / 2}, bounds.size.w / 2 - (4 * INSET + 8)); */
+  /* }revert_to_fb_ctx (ctx); */
+
   // numbers
   if (b_show_numbers) {
     switch_to_shadow_ctx (ctx);{
@@ -381,11 +387,12 @@ static void hands_update_proc(Layer *layer, GContext *ctx) {
   if (b_show_date) {
     graphics_context_set_text_color(ctx, gcolor_numbers);
     int offset = !b_show_numbers * 10;
-#ifdef PBL_RECT
-    graphics_draw_text(ctx, s_date_buffer, fonts_get_system_font(FONT_KEY_GOTHIC_14), GRect(80, 75, 40 + offset, 14), GTextOverflowModeWordWrap, GTextAlignmentCenter, NULL);
-#else
-    graphics_draw_text(ctx, s_date_buffer, fonts_get_system_font(FONT_KEY_GOTHIC_18), GRect(100, 78, 45 + offset, 14), GTextOverflowModeWordWrap, GTextAlignmentCenter, NULL);
-#endif
+    const GRect date_rect = PBL_IF_RECT_ELSE(GRect(80, 75, 40 + offset, 14), GRect(100, 78, 45 + offset, 14));
+    graphics_draw_text(ctx, s_date_buffer, fonts_get_system_font(PBL_IF_RECT_ELSE(FONT_KEY_GOTHIC_14, FONT_KEY_GOTHIC_18)), date_rect, GTextOverflowModeWordWrap, GTextAlignmentCenter, NULL);
+switch_to_shadow_ctx (ctx);{
+      graphics_context_set_fill_color(ctx, gcolor (shadow_date_box));
+      graphics_fill_rect(ctx, grect_inset (date_rect, GEdgeInsets(0,-1,-3)), 0, GCornerNone);
+    }revert_to_fb_ctx (ctx);
   }
 
   // temperature
@@ -475,6 +482,8 @@ static void window_load(Window *window) {
   shadow_hour_hand = new_shadowing_object (2, 4);
   shadow_second_hand = new_shadowing_object (1, 4);
   shadow_dot = new_shadowing_object (-1, 4);
+  shadow_date_box = new_shadowing_object (-2, 0);
+  shadow_hole = new_shadowing_object (-4, 0);
 
   s_simple_bg_layer = layer_create(bounds);
   layer_set_update_proc(s_simple_bg_layer, bg_update_proc);
