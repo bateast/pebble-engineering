@@ -1,0 +1,11 @@
+{
+	"src": {
+		"scripts": ["config/js/main.js"]
+	},
+	"dest": {
+		"scripts": {
+			"dir": "config/js",
+			"name": "main.min.js"
+		}
+	}
+}
