@@ -30,7 +30,7 @@
         "basalt", "chalk"
     ],
     "uuid": "3f2fc7bd-fe40-465f-96fb-9ddf40c6e1f3",
-    "versionLabel": "1.9",
+    "versionLabel": "2.0",
     "watchapp": {
         "watchface": true
     }
