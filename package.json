@@ -1,30 +1,72 @@
 {
-  "name": "pebble-engineering-steps",
-  "version": "1.0.0",
-  "description": "A fork of pebble-engineering by nguyer that incorporates Pebble Health steps.",
-  "main": "index.js",
+  "version": "2.0.0",
+  "license": "GPL",
+  "author": "Baptiste Fouques",
+  "description": "A shadowed fork of pebble-engineering by nguyer",
+  "bugs": {
+    "url": "https://github.com/bateast/pebble-engineering/issues"
+  },
+  "private": true,
+  "repository": {
+    "url": "git+https://github.com/bateast/pebble-engineering.git",
+    "type": "git"
+  },
+  "dependencies": {},
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/kencaron/pebble-engineering.git"
-  },
-  "author": "Ken Caron",
-  "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/kencaron/pebble-engineering/issues"
-  },
-  "homepage": "https://github.com/kencaron/pebble-engineering#readme",
+  "keywords": [
+    "pebble-app"
+  ],
   "devDependencies": {
+    "gulp-jshint": "^2.0.0",
+    "gulp-uglify": "^1.5.2",
+    "gulp-load-plugins": "^1.2.0",
+    "slate": "https://github.com/pebble/slate.git",
+    "jshint-stylish": "^2.1.0",
     "gulp": "^3.9.1",
     "gulp-concat": "^2.6.0",
     "gulp-debug": "^2.1.2",
-    "gulp-jshint": "^2.0.0",
-    "gulp-load-plugins": "^1.2.0",
-    "gulp-uglify": "^1.5.2",
-    "jshint": "^2.9.1",
-    "jshint-stylish": "^2.1.0",
-    "slate": "https://git@github.com:pebble/slate.git"
-  }
+    "jshint": "^2.9.1"
+  },
+  "pebble": {
+    "sdkVersion": "3",
+    "resources": {
+      "media": []
+    },
+    "projectType": "native",
+    "uuid": "3f2fc7bd-fe40-465f-96fb-9ddf40c6e1f3",
+    "messageKeys": {
+      "SHOW_NUMBERS": 1,
+      "COLOR_MINUTE_MARKS": 9,
+      "COLOR_SECOND_HAND": 12,
+      "TEMPERATURE": 0,
+      "COLOR_MINUTE_HAND": 11,
+      "SHOW_DATE": 3,
+      "SHOW_SECOND_HAND": 2,
+      "COLOR_HOUR_HAND": 10,
+      "COLOR_BACKGROUND": 6,
+      "COLOR_LABEL": 7,
+      "SHOW_TEMPERATURE": 4,
+      "SHOW_STEPS": 5,
+      "COLOR_HOUR_MARKS": 8
+    },
+    "enableMultiJS": false,
+    "displayName": "Engineering-shadow",
+    "watchapp": {
+      "onlyShownOnCommunication": false,
+      "hiddenApp": false,
+      "watchface": true
+    },
+    "targetPlatforms": [
+        "basalt", "chalk"
+    ],
+    "capabilities": [
+      "health",
+      "configurable"
+    ]
+  },
+  "main": "index.js",
+  "homepage": "https://github.com/bateast/pebble-engineering/",
+  "name": "pebble-engineering-shadow"
 }

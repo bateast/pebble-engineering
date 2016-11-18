@@ -214,7 +214,7 @@ static int32_t get_angle_for_minute(int hour) {
 
 static void bg_update_proc(Layer *layer, GContext *ctx) {
   GRect bounds = layer_get_bounds(layer);
-  GRect frame = grect_inset(bounds, GEdgeInsets(4 * INSET));
+  GRect frame = bounds; /////// grect_inset(bounds, GEdgeInsets(4 * INSET));
   GRect inner_hour_frame = grect_inset(bounds, GEdgeInsets((4 * INSET) + 8));
   GRect inner_minute_frame = grect_inset(bounds, GEdgeInsets((4 * INSET) + 6));
 
@@ -393,11 +393,12 @@ static void hands_update_proc(Layer *layer, GContext *ctx) {
   if (b_show_date) {
     graphics_context_set_text_color(ctx, gcolor_numbers);
     int offset = !b_show_numbers * 10;
-    const GRect date_rect = PBL_IF_RECT_ELSE(GRect(80, 75, 40 + offset, 14), GRect(100, 78, 45 + offset, 14));
+    const GRect date_rect = (GRect){.origin = (GPoint){.x = bounds.size.w / 2 + 10, .y = bounds.size.h / 2 - PBL_IF_RECT_ELSE(14, 18) / 2},
+                                    .size = (GSize){.w = PBL_IF_RECT_ELSE(40, 45) + offset, .h = PBL_IF_RECT_ELSE(14, 18)}};
     graphics_draw_text(ctx, s_date_buffer, fonts_get_system_font(PBL_IF_RECT_ELSE(FONT_KEY_GOTHIC_14, FONT_KEY_GOTHIC_18)), date_rect, GTextOverflowModeWordWrap, GTextAlignmentCenter, NULL);
     switch_to_shadow_ctx (ctx);{
       graphics_context_set_fill_color(ctx, gcolor (shadow_date_box));
-      graphics_fill_rect(ctx, grect_inset (date_rect, GEdgeInsets(0,-1,-3)), 0, GCornerNone);
+      graphics_fill_rect(ctx, grect_inset (date_rect, GEdgeInsets(0,-1,PBL_IF_RECT_ELSE(-3, -4))), 0, GCornerNone);
     }revert_to_fb_ctx (ctx);
   }
 
